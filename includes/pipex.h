@@ -6,7 +6,7 @@
 /*   By: tgibier <tgibier@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 11:59:04 by tgibier           #+#    #+#             */
-/*   Updated: 2023/07/05 15:24:59 by tgibier          ###   ########.fr       */
+/*   Updated: 2023/07/07 12:00:18 by tgibier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ typedef struct s_data
 	char	*file2;
 	char	*path1;
 	char	*path2;
+	char	**path;
 	char	**cmd1;
 	char	**cmd2;
 	char	**envp;

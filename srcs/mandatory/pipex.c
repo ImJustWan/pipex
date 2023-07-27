@@ -6,14 +6,60 @@
 /*   By: tgibier <tgibier@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/28 10:48:32 by tgibier           #+#    #+#             */
-/*   Updated: 2023/07/05 16:15:23 by tgibier          ###   ########.fr       */
+/*   Updated: 2023/07/07 15:03:08 by tgibier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+char	*creating_paths(char *s1, char *s2)
+{
+	int		i;
+	int		j;
+	int		size1;
+	int		size2;
+	char	*final;
+
+	size1 = ft_strlen(s1);
+	size2 = ft_strlen(s2);
+	final = malloc ((size1 + size2 + 2) * sizeof(char));
+	if (!final)
+		return (NULL);
+	i = 0;
+	j = 0;
+	while (i < size1)
+		final[i++] = s1[j++];
+	final[i++] = '/';
+	j = 0;
+	while (i < size1 + size2 + 1)
+		final[i++] = s2[j++];
+	final[i] = '\0';
+	return (final);
+}
+
+void	doing_smthg_hopefully(char **cmd, char *ze_path, t_data *hoid)
+{
+	int	i;
+
+	if (execve(cmd[0], cmd, NULL) == -1)
+	{
+		i = -1;
+		while (hoid->path[++i])
+		{
+			ze_path = creating_paths(hoid->path[i], cmd[0]);
+			if (execve(ze_path, cmd, NULL) == -1)
+			{
+				free(ze_path);
+				ze_path = NULL;
+			}
+		}
+		perror(ze_path);
+		clean_exit(NULL, hoid);
+	}
+}
+
 void	second_child(t_data *hoid, int *fd)
-{	
+{
 	hoid->out_fd = open(hoid->file2, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	if (hoid->out_fd == -1)
 	{
@@ -28,15 +74,7 @@ void	second_child(t_data *hoid, int *fd)
 	close(fd[1]);
 	if (hoid->out_fd > 2)
 		close(hoid->out_fd);
-	if (execve(hoid->cmd2[0], hoid->cmd2, NULL) == -1)
-	{
-		hoid->path2 = ft_strjoin("/bin/", hoid->cmd2[0]);
-		if (execve(hoid->path2, hoid->cmd2, NULL) == -1)
-		{
-			perror(hoid->cmd2[0]);
-			clean_exit(NULL, hoid);
-		}
-	}
+	doing_smthg_hopefully(hoid->cmd2, hoid->path2, hoid);
 	exit (1);
 }
 
@@ -55,15 +93,7 @@ void	first_child(t_data *hoid, int *fd)
 	close(hoid->in_fd);
 	close(fd[0]);
 	close(fd[1]);
-	if (execve(hoid->cmd1[0], hoid->cmd1, NULL) == -1)
-	{
-		hoid->path1 = ft_strjoin("/bin/", hoid->cmd1[0]);
-		if (execve(hoid->path1, hoid->cmd1, NULL) == -1)
-		{
-			perror(hoid->cmd1[0]);
-			clean_exit(NULL, hoid);
-		}
-	}
+	doing_smthg_hopefully(hoid->cmd1, hoid->path1, hoid);
 	exit (1);
 }
 

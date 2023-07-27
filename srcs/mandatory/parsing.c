@@ -6,53 +6,50 @@
 /*   By: tgibier <tgibier@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/23 13:51:53 by tgibier           #+#    #+#             */
-/*   Updated: 2023/07/05 16:59:46 by tgibier          ###   ########.fr       */
+/*   Updated: 2023/07/07 15:15:09 by tgibier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	check_envp(char **envp)
+int	extract_path(char *str, t_data *hoid)
 {
+	char	*temp;
 	int		i;
-	int		j;
-	int		len;
-	// char	*str;
 
-	printf("check envp\n");
-	j = 0;
-	i = 0;
-	len = 0;
-	while (envp[j++] && envp[j][i + 6])
+	(void)hoid;
+	temp = malloc(sizeof(char) * ft_strlen(str) - 4);
+	if (!temp)
+		return (0);
+	i = -1;
+	while (str[++i + 5])
+		temp[i] = str[i + 5];
+	temp[i] = '\0';
+	hoid->path = ft_split(temp, ':');
+	if (!hoid->path)
+		return (0);
+	free(temp);
+	return (1);
+}
+
+void	check_envp(char **envp, t_data *hoid)
+{
+	int	i;
+	int	j;
+
+	j = -1;
+	while (envp[++j])
 	{
-		if (envp[j][i] == 'P' && envp[j][i + 1] == 'A' && envp[j][i + 2] == 'T'
-			&& envp[j][i + 3] == 'H' /*&& envp[j][i + 5] == 'm'*/)
+		i = -1;
+		while (envp[j][i + 6])
 		{
-			// while (envp[j][i] && envp[j][i] != '\n')
-			// {
-			// 	// printf("str is %c\n", envp[j][i]);
-			// 	len++;
-			// 	i++;
-			// }
-			printf("len is %d\n", len);
-			return (0);
-			// str = malloc (sizeof(char) * (ft_strlen(envp[j]) - 3));
-			// if (!str)
-			// 	return (0);
-			// i = 0;
-			// while (envp[j][i + 4])
-			// {
-			// 	str[i] = envp[j][i + 4];
-			// 	i++;
-			// }
-			// str[i] = '\0';
-			// printf("str is %s\n", str);
+			if (envp[j][i] == 'P' && envp[j][i + 1] == 'A'
+				&& envp[j][i + 2] == 'T' && envp[j][i + 3] == 'H'
+				&& envp[j][i + 6] == 'm')
+				extract_path(envp[j], hoid);
+			i++;
 		}
-		i++;
-		// return (1);
-
 	}
-	return (0);
 }
 
 int	creating_hoid(t_data *hoid, int argc, char **argv)
@@ -80,14 +77,13 @@ int	creating_hoid(t_data *hoid, int argc, char **argv)
 int	handle_args(t_data *hoid, int argc, char **argv, char **envp)
 {
 	if (argc != 5)
-		return (clean_exit(NULL, hoid));
-	if (!creating_hoid(hoid, argc, argv))
-		return (clean_exit(NULL, hoid));
-	if (!check_envp(envp))
 	{
-		ft_printf("pipex: %s: No such file or directory\n", hoid->cmd2[0]);
-		ft_printf("pipex: %s: No such file or directory\n", hoid->cmd1[0]);
+		ft_putstr_fd("\n\t\033[36;1m🦖 Invalid Arguments 🦖\033[0m\n\n", 1);
+		ft_putstr_fd("   I only take 4 arguments, try again !\n", 1);
 		return (clean_exit(NULL, hoid));
 	}
+	if (!creating_hoid(hoid, argc, argv))
+		return (clean_exit(NULL, hoid));
+	check_envp(envp, hoid);
 	return (1);
 }
